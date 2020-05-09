@@ -36,7 +36,11 @@ export const define = (initialState, defintion) => {
       const Provider = createProvider(initialState(props))
       return ({ children }) => {
         initialized = true
-        return <Provider>{children}</Provider>
+        return React.createElement(
+          Provider,
+          null,
+          children
+        )
       }
     },
     use () {
