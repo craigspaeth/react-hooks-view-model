@@ -1,12 +1,11 @@
 # React Hooks View Model
 
-A library that makes it easy to model global state changes with reducer-like functions using React Hooks.
+A lightweight library for modeling global state changes with reducer-like functions using React Hooks.
 
 ## Motivation
 
 In a sufficiently complex React app one might encounter any number of the following concerns around state management:
 
-- Lifecycle changes like componenDidMount that update state
 - Async updates to state e.g. fetching data to render from an API
 - Computing values from state often called "selectors" or "derived state"
 - Sharing state across components without tons of props boilerplate
@@ -14,11 +13,11 @@ In a sufficiently complex React app one might encounter any number of the follow
 
 Often the solution to this problem is introducing Redux, with a number of additional libraries like Redux-Thunk, Reselect, etc. The basic value prop of this set up is that you can now easily write testable/composable pure functions that can easily share the same piece of global state.
 
-However this value props comes with an opinionated architecture that encourages patterns like writing switch statements which must be careful to return immutable data, decomposing functons across sub-branches of state, the reducer/action creator split, provider components and dispatch, etc. The result of this architecture often leads to unecessary boilerplate and exposing the logic around state changes in unobvious ways.
+However this value prop comes with an opinionated architecture that encourages patterns like writing switch statements which must be careful to return immutable data, decomposing functons across sub-branches of state, the reducer/action creator split, provider components and dispatch, etc. The result of this architecture often leads to unecessary boilerplate and exposing the logic around state changes in unobvious ways.
 
 React Hooks has gone a long way towards making it easy to use all functional patterns for components and local state, but it doesn't provide the benefit Redux does of a simple shared global state and patterns for encouraging writing code in pure functions.
 
-This library providers a number of wrapper functions around React Hooks that covers all of the concerns above in a way that encourages pure functions and a simple single global state object.
+This library providers a few wrapper functions around React Hooks that covers all of the concerns above in a way that encourages pure functions and a simple single global state object.
 
 ## Example
 
@@ -26,7 +25,6 @@ Define your view model
 
 ````javascript
 import {
-  componentDidMount,
   define,
   reducer,
   selector
@@ -60,7 +58,7 @@ export const fetchTodos = async (state, page = 1) => {
   const todos = await fetch(`/api/todo?page=${page}`)
 
   // You're always welcome to compose these from other pure reducer functions
-  return todos.reduce((s, t) => addTodo(s, t), state)
+  return { ...state, todos: todos.reduce((s, t) => addTodo(s, t), state) }
 }
 
 // Write easy to test/compose selectors that return values from derived state
@@ -70,28 +68,26 @@ export const completedTodos = (state) =>
 export const incompleteTodos = (state) =>
   state.todos.filter((todo) => !todo.completed)
 
-// Certain common effects can be encapsulated as reducer-like functions too
-export const initLoading = (state) =>
-  loading(state)
-
-export const initTodos = async (state) => {
-  const newState = await fetchTodos(state)
-  return doneLoading(newState)
-}
+// Chain reducers that share the same arguments with state updates inbetween 
+export const initTodos = [
+  loading,
+  fetchTodos,
+  doneLoading
+]
 
 export default define(initialState, {
   addTodo: reducer(addTodo),
   fetchTodos: reducer(fetchTodos),
   completedTodos: selector(completedTodos),
   incompleteTodos: selector(incompleteTodos),
-  initLoading: componentDidMount(initLoading),
-  initTodos: componentDidMount(initTodos)
+  initTodos: reducer(initTodos)
 })
 ````
 
-Initialize the model at the top-level component and wrap with the <Provider />. Then use the model call the wrapped functions to make state updates
+Initialize the model at the top-level component and wrap with the <Provider />. Then use the model to call the wrapped functions for state updates.
 
 ````javascript
+import { useEffect } from 'react'
 import todoModel from './view-model'
 
 const TodoList = () => {
@@ -111,15 +107,13 @@ const Todos = (props) => {
   const {
     addTodo,
     fetchTodos,
-    initLoading,
     initTodos,
     state
   } = todoModel.use()
 
-  initLoading()
-  initTodos()
+  useEffect(initTodos, [])
 
-  return
+  return (
     <div>
       {state.loading ? 'Loading...' : <TodoList />}
       <button onClick={() => addTodo('Pick up milk')}>
@@ -129,7 +123,7 @@ const Todos = (props) => {
         Load more
       </button>
     </div>
-
+  )
 }
 
 const Main = () => {
