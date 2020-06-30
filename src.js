@@ -3,30 +3,31 @@ import { useGlobal, createProvider } from 'reactn'
 import React from 'react'
 
 export const reducer = fn => (state, setState) => {
-  return (...args) =>
-    setTimeout(async () => {
-      const newState = await fn(state, ...args)
-      if (!_.isEqual(_.keys(state), _.keys(newState))) {
-        console.warn(
-          'Component not re-rendering? Ensure adding new keys to initial state.'
-        )
+  if (_.isArray(fn)) {
+    return async (...args) => {
+      let chainedState = state
+      for (const subFn of fn) {
+        chainedState = await reducer(subFn)(chainedState, setState)(...args)
       }
-      setState(newState)
+      return state
+    }
+  } else return async (...args) =>
+    new Promise(resolve => {
+      setTimeout(async () => {
+        const newState = await fn(state, ...args)
+        if (!_.isEqual(_.keys(state), _.keys(newState))) {
+          console.warn(
+            'Component not re-rendering? Ensure adding new keys to initial state.'
+          )
+        }
+        setState(newState)
+        resolve(newState)
+      })
     })
 }
 
 export const selector = fn => state => (...args) => {
   return fn(state, ...args)
-}
-
-export const componentDidMount = fn => (
-  state,
-  setState,
-  useEffect = React.useEffect
-) => (...args) => {
-  useEffect(() => {
-    reducer(fn)(state, setState)(...args)
-  }, [])
 }
 
 export const define = (initialState, defintion) => {

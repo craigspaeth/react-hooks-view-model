@@ -4,12 +4,13 @@
   "description": "A library that makes it easy to model global state changes with reducer-like functions using React Hooks.",
   "main": "index.js",
   "directories": {
-    "test": "test",
-    "build": "babel src.js > index.js",
-    "prepublish": "npm run build"
+    "test": "test"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "babel src.js > index.js",
+    "example": "watchify -t [babelify] example/src.js -o example/script.js",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -24,13 +25,16 @@
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-env": "^7.10.3",
     "@babel/preset-react": "^7.9.4",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.1",
     "express": "^4.17.1",
     "jest": "^26.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "superagent": "^5.2.2"
+    "superagent": "^5.2.2",
+    "watchify": "^3.11.1"
   },
   "dependencies": {
     "reactn": "^2.2.7"

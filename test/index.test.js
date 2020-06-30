@@ -1,4 +1,4 @@
-import * as vm from '../'
+import * as vm from '../src.js'
 import reactn from 'reactn'
 
 let state
@@ -32,13 +32,6 @@ test('selector converts a selector function into derived state', async () => {
   expect(vm.selector(state => state + 1)(state)()).toEqual(1)
 })
 
-test('componentDidMount updates state as init effect', async () => {
-  state = 0
-  vm.componentDidMount(state => state + 1)(state, setState, fn => fn())()
-  await nextTick()
-  expect(state).toEqual(1)
-})
-
 test('define throws if you dont use the provider', async () => {
   const model = vm.define(() => {})
   model.init()
@@ -55,7 +48,24 @@ test('define converts reducers to callbacks', async () => {
   })
   const Provider = model.init()
   Provider({ children: [] })
-  model.use().add()
-  await nextTick()
+  await model.use().add()
   expect(model.use().state.count).toEqual(1)
+})
+
+test('define converts reducer chains to a callback', async () => {
+  const initialState = () => ({ count: 0 })
+  reactn.setGlobal({ count: 0 })
+  const addOne = state => ({ ...state, count: state.count + 1 })
+  const tick = state => Promise.resolve(state)
+  const model = vm.define(initialState, {
+    tally: vm.reducer([
+      addOne,
+      tick,
+      addOne
+    ])
+  })
+  const Provider = model.init()
+  Provider({ children: [] })
+  await model.use().tally()
+  expect(model.use().state.count).toEqual(2)
 })
