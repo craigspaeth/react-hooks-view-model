@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { define, reducer } from '../'
+import { define, reducer } from '../src.js'
 
 const initialState = () => ({
   count: 0,
@@ -12,10 +12,8 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 const inc = (state) => ({ ...state, count: state.count + 1 })
 
 const incByTen = async (state) => {
-  console.log('state by start', state)
   state = {...state, baz: 'bam'}
   await sleep(5000)
-  console.log('state by end', state)
   return { ...state, count: state.count + 10 }
 }
 
@@ -48,6 +46,6 @@ const Main = () => {
 ;(() => {
   ReactDOM.render(
     <Main />,
-    document.getElementById('body')
+    document.getElementById('main')
   )
 })()
