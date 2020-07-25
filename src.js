@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { useGlobal, createProvider } from 'reactn'
+import addReactNDevTools from 'reactn-devtools'
 import React from 'react'
 
 export const reducer = fn => (state, setState) => {
@@ -35,6 +36,7 @@ export const define = (initialState, defintion) => {
   return {
     init (props) {
       const Provider = createProvider(initialState(props))
+      addReactNDevTools(Provider)
       return ({ children }) => {
         initialized = true
         return React.createElement(
