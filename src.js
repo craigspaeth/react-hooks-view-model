@@ -2,16 +2,7 @@ import _ from 'lodash'
 import { useGlobal, createProvider } from 'reactn'
 import React from 'react'
 
-export const reducer = fn => (state, originaSetState) => {
-  const setState = newState => {
-    originaSetState(newState)
-    console.debug(
-      `React Hooks View Model update #${fn.name}`,
-      { ...state },
-      { ...newState },
-      fn
-    )
-  }
+export const reducer = fn => (state, setState) => {
   if (_.isArray(fn)) {
     return async (...args) => {
       let chainedState = state
@@ -24,7 +15,9 @@ export const reducer = fn => (state, originaSetState) => {
     return async (...args) =>
       new Promise(resolve => {
         setTimeout(async () => {
+          console.debug(`View model updating #${fn.name}...`, { ...state }, fn)
           const newState = await fn(state, ...args)
+          console.debug(`View model updated #${fn.name}`, { ...newState }, fn)
           if (!_.isEqual(_.keys(state), _.keys(newState))) {
             console.warn(
               'Component not re-rendering? Ensure adding new keys to initial state.'
