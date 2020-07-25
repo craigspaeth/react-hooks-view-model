@@ -9,6 +9,8 @@ var _lodash = _interopRequireDefault(require("lodash"));
 
 var _reactn = require("reactn");
 
+var _reactnDevtools = _interopRequireDefault(require("reactn-devtools"));
+
 var _react = _interopRequireDefault(require("react"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -101,6 +103,7 @@ var define = function define(initialState, defintion) {
   return {
     init: function init(props) {
       var Provider = (0, _reactn.createProvider)(initialState(props));
+      (0, _reactnDevtools["default"])(Provider);
       return function (_ref4) {
         var children = _ref4.children;
         initialized = true;

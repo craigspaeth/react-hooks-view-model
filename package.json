@@ -1,6 +1,6 @@
 {
   "name": "react-hooks-view-model",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A library that makes it easy to model global state changes with reducer-like functions using React Hooks.",
   "main": "index.js",
   "directories": {
@@ -37,9 +37,7 @@
     "watchify": "^3.11.1"
   },
   "dependencies": {
-    "reactn": "^2.2.7",
-    "reactn-devtools": "^1.1.0",
-    "redux": "^4.0.5"
+    "reactn": "^2.2.7"
   },
   "peerDependencies": {
     "react-dom": "^16.13.1",
